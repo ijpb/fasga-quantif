@@ -45,13 +45,15 @@ for (i=0; i<list.length; i++) {
    // sauve l'image resultat
    selectWindow("current-filtered-regionsRGB");
    save(path2 + "-regionsRGB.tif");
+   close("current-filtered-regionsRGB");
    
    //save(path + ".tif");
    
-   run("Fasga Region Quantification", "current-filtered label=current-filtered-regions resolution=1");
+   selectWindow("current-filtered");
+   rename(currentName);
+   run("Fasga Region Quantification", currentName+" label=current-filtered-regions resolution=1");
 
    // ferme les images intermediaires
-   close("current-filtered-regionsRGB");
    close("current-filtered-regions");
    close("Blue Region");
    close("Red Region");
