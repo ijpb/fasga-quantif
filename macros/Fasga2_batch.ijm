@@ -70,6 +70,8 @@ for (i=0; i<list.length; i++) {
 
 // A la fin du processus, sauve le tableau de donnees
 resultsTableName = "Quantif. Fasga";
+getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+dateString = "-" + year + "." + month + "." + dayOfMonth;
 selectWindow(resultsTableName);
-saveAs("Text", dir2 + resultsTableName + ".txt");
+saveAs("Text", dir2 + resultsTableName + dateString + ".txt");
 
