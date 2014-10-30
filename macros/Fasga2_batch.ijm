@@ -40,7 +40,7 @@ for (i=0; i<list.length; i++) {
    path2 = dir2 + list[i];
    dotIndex = lastIndexOf(path2, ".");
    if (dotIndex!=-1)
-      path2= substring(path2, 0, dotIndex); // remove extension
+      path2 = substring(path2, 0, dotIndex); // remove extension
 
    // sauve l'image resultat
    selectWindow("current-filtered-regionsRGB");
@@ -67,4 +67,9 @@ for (i=0; i<list.length; i++) {
    // ferme l'image de depart
    close(list[i]);
 }
+
+// A la fin du processus, sauve le tableau de donnees
+resultsTableName = "Quantif. Fasga";
+selectWindow(resultsTableName);
+saveAs("Text", dir2 + resultsTableName + ".txt");
 
