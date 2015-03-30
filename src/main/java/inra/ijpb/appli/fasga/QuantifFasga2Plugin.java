@@ -17,10 +17,10 @@ import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.binary.ConnectedComponents;
 import inra.ijpb.data.image.ColorImages;
 import inra.ijpb.event.DefaultAlgoListener;
+import inra.ijpb.label.LabelImages;
 import inra.ijpb.math.ImageCalculator;
 import inra.ijpb.measure.GeometricMeasures2D;
 import inra.ijpb.morphology.GeodesicReconstruction;
-import inra.ijpb.morphology.LabelImages;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.OctagonStrel;
@@ -30,6 +30,7 @@ import inra.ijpb.segment.Threshold;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
+
 import static inra.ijpb.math.ImageCalculator.not;
 
 /**
