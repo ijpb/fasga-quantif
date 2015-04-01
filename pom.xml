@@ -13,7 +13,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>quantif_fasga</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.2</version>
 
 	<name>plugins/Quantif_Fasga2.jar</name>
 	<description>Quantification of Fasga-stained plant sections</description>
@@ -84,8 +84,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       			<groupId>org.apache.maven.plugins</groupId>
       			<artifactId>maven-jar-plugin</artifactId>
       			<configuration>
-        			<outputDirectory>${basedir}/plugins</outputDirectory>
-        			<!-- <outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory> -->
+        			<!-- <outputDirectory>${basedir}/plugins</outputDirectory> -->
+        			<outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory>
       			</configuration>
     		</plugin>
     		
