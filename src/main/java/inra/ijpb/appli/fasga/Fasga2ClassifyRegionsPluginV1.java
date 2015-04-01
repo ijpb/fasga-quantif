@@ -23,15 +23,14 @@ import inra.ijpb.morphology.GeodesicReconstruction;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.SquareStrel;
 import inra.ijpb.segment.Threshold;
-import inra.ijpb.util.ColorMaps;
 
 import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.HashMap;
 
 /**
+ * Old version of the plugin, kept for compatibility, in case of...
+ * 
  * @author David Legland
  *
  */

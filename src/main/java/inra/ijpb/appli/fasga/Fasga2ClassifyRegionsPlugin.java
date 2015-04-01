@@ -7,13 +7,13 @@ import static inra.ijpb.math.ImageCalculator.not;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.math.ImageCalculator;
@@ -21,9 +21,12 @@ import inra.ijpb.morphology.GeodesicReconstruction;
 import inra.ijpb.segment.Threshold;
 
 import java.awt.AWTEvent;
+import java.awt.Color;
 import java.io.File;
 
 /**
+ * Classify an image of maize stem after fasga coloration to identify various tissues type.
+ *    
  * @author David Legland
  *
  */
@@ -115,8 +118,6 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent evt)
 	{
-		System.out.println("dialog item changed");
-	
 		parseDialogParameters(gd);
     	return true;
 	}
@@ -164,11 +165,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 			throw new IllegalArgumentException("Requires a color image as first input");
 		}
 		
-		// split channels
-		IJ.log("  extract HSB components");
-		ImageStack hsb = ((ColorProcessor) image).getHSBStack();
-		ByteProcessor hue = convertToByteProcessor(hsb.getProcessor(1), true);
-		ByteProcessor brightness = convertToByteProcessor(hsb.getProcessor(3), true);
+		// First extract hue and brightness as float processors (between 0 and 1)
+		IJ.log("  Extract Hue and Brightness components");
+		ColorProcessor colorImage = (ColorProcessor) image;
+		FloatProcessor hue = computeHue(colorImage);
+		FloatProcessor brightness = colorImage.getBrightness();
 
 		
 		if (showImages) {
@@ -176,20 +177,41 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 			new ImagePlus("Brightness", brightness).show();
 		}
 		
+
+		// Stem image with different threshold, but keep rind within.
+		IJ.log("  Compute Stem Image");
+		ImageProcessor stem = Threshold.threshold(brightness, 0, 200.0 / 255.0);
+		stem = GeodesicReconstruction.fillHoles(stem);
+		stem = BinaryImages.keepLargestRegion(stem);
 		
-		// un peu de morpho math pour lisser
-		IJ.log("  extract dark regions");
+		// detect eventual holes in the stem
+		IJ.log("  Detect holes");
+		ImageProcessor holes = Threshold.threshold(brightness, .997, 1.0);
+		ImageProcessor holes2 = Threshold.threshold(brightness, .99, 1.0);
+		holes = GeodesicReconstruction.reconstructByDilation(holes, holes2);
+		
+		// combine image of stem with image of holes
+		stem = ImageCalculator.combineImages(stem, not(holes), ImageCalculator.Operation.AND);
+		if (showImages) {
+			new ImagePlus("Segmented Stem", stem).show();
+		}
+	
+
+		// identify dark regions (-> either rind or bundles)
+		IJ.log("  Extract dark regions");
 		// Extract bundles + sclerenchyme
-		ImageProcessor darkRegions = Threshold.threshold(brightness, 0, darkRegionsThreshold);
+		ImageProcessor darkRegions = Threshold.threshold(brightness, 0, darkRegionsThreshold / 255.0);
 		if (showImages) {
 			new ImagePlus("Dark Regions", darkRegions).show();
 		}
 		
-		// Compute rind image
+		// Compute rind image, as the largest dark region
 		IJ.log("  Compute Rind");
-		ImageProcessor rind = BinaryImages.keepLargestRegion(darkRegions);		
+		ImageProcessor rind = BinaryImages.keepLargestRegion(darkRegions);
+		stem = ImageCalculator.combineImages(stem, rind, ImageCalculator.Operation.OR);
 		
-		// Compute bundles image
+		
+		// Compute bundles image, by removing rind and filtering remaining image
 		IJ.log("  Compute Bundles");
 		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
 		bundles = GeodesicReconstruction.fillHoles(bundles);
@@ -198,15 +220,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 			new ImagePlus("Bundles", bundles).show();
 		}
 		
-		// Stem image with different threshold, but keep rind within.
-		IJ.log("  Compute Stem Image");
-		ImageProcessor stem = Threshold.threshold(brightness, 0, 200);
-		stem = GeodesicReconstruction.fillHoles(stem);
-		stem = BinaryImages.keepLargestRegion(stem);
-		stem = ImageCalculator.combineImages(stem, rind, ImageCalculator.Operation.OR);
-		
 		// Extract red area
-		ImageProcessor redZone = Threshold.threshold(hue, redRegionThreshold, 255);
+		ImageProcessor redZone = Threshold.threshold(hue, redRegionThreshold / 255.0, 1);
 		
 		// combine with stem image to remove background
 		constrainToMask(redZone, stem);
@@ -234,50 +249,77 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		return labelImage;
 	}
 	
-	private static final ByteProcessor convertToByteProcessor(ImageProcessor image, boolean rescale) 
+	private static final FloatProcessor computeHue(ColorProcessor image)
 	{
 		// get image size
 		int width = image.getWidth();
 		int height = image.getHeight();
 		
-		// Compute min and max value for rescaling
-		double minValue = Double.MAX_VALUE;
-		double maxValue = Double.MIN_VALUE;
-		if (rescale) 
-		{
-			double val;
-			for (int y = 0; y < height; y++)
-			{
-				for (int x = 0; x < width; x++)
-				{
-					val = image.getf(x, y);
-					minValue = Math.min(minValue, val);
-					maxValue = Math.max(maxValue, val);
-				}
-			}
-		}
-		else
-		{
-			minValue = 0;
-			maxValue = 255;
-		}
-
-		// Allocate new image
-		ByteProcessor result = new ByteProcessor(width, height);
-
-		// Rescale value of each pixel
+		// allocate memory for result
+		FloatProcessor result = new FloatProcessor(width, height);
+		
+		// iterate over pixels
+		float[] hsb = new float[3]; 
 		for (int y = 0; y < height; y++)
 		{
 			for (int x = 0; x < width; x++)
 			{
-				double val = image.getf(x, y);
-				val = 255 * (val - minValue) / (maxValue - minValue);
-				result.set(x, y, (int) val);
+				int c = image.get(x, y);
+				int r = (c & 0xFF0000) >> 16;
+				int g = (c & 0xFF00) >> 8;
+				int b =  c & 0xFF;
+				Color.RGBtoHSB(r, g, b, hsb);
+				result.setf(x, y, hsb[0]);
 			}
 		}
 		
 		return result;
 	}
+	
+//	private static final ByteProcessor convertToByteProcessor(ImageProcessor image, boolean rescale) 
+//	{
+//		// get image size
+//		int width = image.getWidth();
+//		int height = image.getHeight();
+//		
+//		// Compute min and max value for rescaling
+//		double minValue = Double.MAX_VALUE;
+//		double maxValue = Double.MIN_VALUE;
+//		if (rescale) 
+//		{
+//			double val;
+//			for (int y = 0; y < height; y++)
+//			{
+//				for (int x = 0; x < width; x++)
+//				{
+//					val = image.getf(x, y);
+//					minValue = Math.min(minValue, val);
+//					maxValue = Math.max(maxValue, val);
+//				}
+//			}
+//		}
+//		else
+//		{
+//			minValue = 0;
+//			maxValue = 255;
+//		}
+//
+//		// Allocate new image
+//		ByteProcessor result = new ByteProcessor(width, height);
+//
+//		// Rescale value of each pixel
+//		for (int y = 0; y < height; y++)
+//		{
+//			for (int x = 0; x < width; x++)
+//			{
+//				double val = image.getf(x, y);
+//				val = 255 * (val - minValue) / (maxValue - minValue);
+//				result.set(x, y, (int) val);
+//			}
+//		}
+//		
+//		return result;
+//	}
 	
 	public static final ColorProcessor colorizeRegionImage(ImageProcessor labelImage)
 	{
@@ -372,7 +414,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		new ImageJ();
 		
 		System.out.println(new File(".").getAbsolutePath());
-		File file = new File("./src/test/resources/files/maize-crop-filtered.tif");
+//		File file = new File("./src/test/resources/files/maize-crop-filtered.tif");
+		File file = new File("./src/test/resources/files/F98902S4-crop-scale20-filtered.tif");
 		
 		ImagePlus imagePlus = IJ.openImage(file.getPath());
 		if (imagePlus == null) 
