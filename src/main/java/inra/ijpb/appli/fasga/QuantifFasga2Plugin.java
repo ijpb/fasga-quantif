@@ -34,6 +34,12 @@ import java.util.HashMap;
 import static inra.ijpb.math.ImageCalculator.not;
 
 /**
+ * Plugin integrating the various processing step of FAsga quantification. The steps include:
+ * <ul>
+ * <li> Morphological filtering</li> 
+ * <li> Tissues classification</li> 
+ * <li> Quantification (morphology and colorimetry)</li> 
+ * </ul>
  * @author David Legland
  *
  */

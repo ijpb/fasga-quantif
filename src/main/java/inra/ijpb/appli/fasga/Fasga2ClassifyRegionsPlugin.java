@@ -56,11 +56,12 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	
 	/**
 	*/
-	public int setup(String arg, ImagePlus imp) {
-
+	public int setup(String arg, ImagePlus imp) 
+	{
 		// Called at the end of plugin for validating result
 		// -> opens a new frame with result image, and cleanup original frame
-		if (arg.equals("final")) {
+		if (arg.equals("final")) 
+		{
 			IJ.log("  setup(\"final\")");
 			
 			// replace the preview image by the original image 
@@ -85,7 +86,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	}
 
 	@Override
-	public int showDialog(ImagePlus imp, String cmd, PlugInFilterRunner pfr)
+	public int showDialog(ImagePlus imp, String cmd, PlugInFilterRunner pfr) 
 	{
 		System.out.println("show dialog");
 		
@@ -142,9 +143,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 				this.darkRegionThreshold, this.redRegionThreshold, true);
 		this.resultRGB = colorizeRegionImage(this.result);
 				
-    	if (previewing) {
+    	if (previewing) 
+    	{
     		// Fill up the values of original image with values of the result
-    		for (int i = 0; i < image.getPixelCount(); i++) {
+    		for (int i = 0; i < image.getPixelCount(); i++) 
+    		{
     			image.set(i, resultRGB.get(i));
     		}
         }
@@ -172,7 +175,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		FloatProcessor brightness = colorImage.getBrightness();
 
 		
-		if (showImages) {
+		if (showImages)
+		{
 			new ImagePlus("Hue", hue).show();
 			new ImagePlus("Brightness", brightness).show();
 		}
@@ -192,7 +196,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		
 		// combine image of stem with image of holes
 		stem = ImageCalculator.combineImages(stem, not(holes), ImageCalculator.Operation.AND);
-		if (showImages) {
+		if (showImages)
+		{
 			new ImagePlus("Segmented Stem", stem).show();
 		}
 	
@@ -201,7 +206,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		IJ.log("  Extract dark regions");
 		// Extract bundles + sclerenchyme
 		ImageProcessor darkRegions = Threshold.threshold(brightness, 0, darkRegionsThreshold / 255.0);
-		if (showImages) {
+		if (showImages)
+		{
 			new ImagePlus("Dark Regions", darkRegions).show();
 		}
 		
@@ -216,7 +222,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
 		bundles = GeodesicReconstruction.fillHoles(bundles);
 		bundles = BinaryImages.areaOpening(bundles, 250);
-		if (showImages) {
+		if (showImages) 
+		{
 			new ImagePlus("Bundles", bundles).show();
 		}
 		
@@ -225,7 +232,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		
 		// combine with stem image to remove background
 		constrainToMask(redZone, stem);
-		if (showImages) {
+		if (showImages) 
+		{
 			new ImagePlus("Red Region", redZone).show();
 		}
 		
@@ -238,7 +246,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		ImageProcessor blueZone = ImageCalculator.combineImages(not(redZone), not(rind), op);
 		blueZone = ImageCalculator.combineImages(blueZone, not(bundles), op);
 		constrainToMask(blueZone, stem);
-		if (showImages) {
+		if (showImages) 
+		{
 			new ImagePlus("Blue Region", blueZone).show();
 		}
 

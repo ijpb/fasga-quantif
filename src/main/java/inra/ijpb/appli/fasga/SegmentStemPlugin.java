@@ -11,25 +11,23 @@ import inra.ijpb.morphology.GeodesicReconstruction;
 import inra.ijpb.segment.Threshold;
 
 /**
- * 
- */
-
-/**
  * Segment a maize stem in a Color or grayscale image.
  * 
  * @author David Legland
  *
  */
-public class SegmentStemPlugin implements PlugIn {
-
+public class SegmentStemPlugin implements PlugIn 
+{
 	/* (non-Javadoc)
 	 * @see ij.plugin.PlugIn#run(java.lang.String)
 	 */
 	@Override
-	public void run(String arg) {
+	public void run(String arg) 
+	{
 		// Check an image was open
 		ImagePlus image = WindowManager.getCurrentImage();
-		if (image == null) {
+		if (image == null) 
+		{
 			IJ.error("No image", "Need at least one image to work");
 			return;
 		}
@@ -44,7 +42,8 @@ public class SegmentStemPlugin implements PlugIn {
 		res.show();
 	}
 
-	public ImagePlus exec(ImagePlus image) {
+	public ImagePlus exec(ImagePlus image)
+	{
 		// extract processor of input image
 		ImageProcessor ip = image.getProcessor();
 		
@@ -64,12 +63,16 @@ public class SegmentStemPlugin implements PlugIn {
 	 * @param image input image (converted to byte if needed)
 	 * @return binary image processor corresponding to the stem
 	 */
-	public static final ImageProcessor segmentStem(ImageProcessor image) {
+	public static final ImageProcessor segmentStem(ImageProcessor image) 
+	{
 		// convert to byte if needed
 		ImageProcessor res;
-		if (image instanceof ByteProcessor) {
+		if (image instanceof ByteProcessor) 
+		{
 			res = (ByteProcessor) image.duplicate();
-		} else {
+		}
+		else 
+		{
 			res = (ByteProcessor) image.convertToByte(false);
 		}
 		

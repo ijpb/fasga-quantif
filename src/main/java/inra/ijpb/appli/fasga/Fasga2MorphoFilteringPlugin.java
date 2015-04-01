@@ -21,12 +21,14 @@ import java.awt.AWTEvent;
 import java.io.File;
 
 /**
+ * Plugin for appying morphological filtering on color image representing fasga
+ * stained maize section.
+ * 
  * @author David Legland
  *
  */
 public class Fasga2MorphoFilteringPlugin implements ExtendedPlugInFilter, DialogListener 
 {
-
 	/** Apparently, it's better to store flags in plugin */
 	private int flags = DOES_ALL | KEEP_PREVIEW | FINAL_PROCESSING;
 	
@@ -51,11 +53,12 @@ public class Fasga2MorphoFilteringPlugin implements ExtendedPlugInFilter, Dialog
 	
 	/**
 	*/
-	public int setup(String arg, ImagePlus imp) {
-
+	public int setup(String arg, ImagePlus imp) 
+	{
 		// Called at the end of plugin for validating result
 		// -> opens a new frame with result image, and cleanup original frame
-		if (arg.equals("final")) {
+		if (arg.equals("final")) 
+		{
 			IJ.log("  setup(\"final\")");
 			
 			// replace the preview image by the original image 

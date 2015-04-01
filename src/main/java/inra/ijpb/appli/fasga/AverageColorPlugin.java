@@ -14,11 +14,15 @@ import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
- * Comptue the average color in an image, or within the ROI.
+ * Compute the average color in an image, or within the ROI.
+ * 
+ * @see AverageByRegionPlugin
+ * 
  * @author David Legland
  *
  */
-public class AverageColorPlugin implements PlugIn {
+public class AverageColorPlugin implements PlugIn 
+{
 
 	/* (non-Javadoc)
 	 * @see ij.plugin.PlugIn#run(java.lang.String)

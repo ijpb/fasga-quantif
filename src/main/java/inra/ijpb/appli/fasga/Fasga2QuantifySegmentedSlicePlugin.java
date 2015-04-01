@@ -17,6 +17,9 @@ import inra.ijpb.binary.ConnectedComponents;
 import inra.ijpb.label.LabelImages;
 
 /**
+ * Plugin for quantifying the colorimetry and morphology in various regions of a
+ * color image.
+ * 
  * @author David Legland
  *
  */
@@ -62,14 +65,16 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 		// - a binary image (coded as uint8)
 		// - a target color
 		int[] indices = WindowManager.getIDList();
-		if (indices==null) {
+		if (indices==null) 
+		{
 			IJ.error("No image", "Need at least one image to work");
 			return PlugInFilter.DONE;
 		}
 
 		// create the list of image names
 		String[] imageNames = new String[indices.length];
-		for (int i = 0; i < indices.length; i++) {
+		for (int i = 0; i < indices.length; i++) 
+		{
 			imageNames[i] = WindowManager.getImage(indices[i]).getTitle();
 		}
 		
@@ -95,7 +100,8 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 		return flags;
 	}
 
-	private void parseDialogParameters(GenericDialog gd) {
+	private void parseDialogParameters(GenericDialog gd) 
+	{
 		// Extract parameters
 		int refImageIndex = (int) gd.getNextChoiceIndex();
 		int labelImageIndex = (int) gd.getNextChoiceIndex();
@@ -172,7 +178,8 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 				(ColorProcessor) refImage, labelImage);
 		
 		// Creates the new table
-		if (fasgaResults == null) {
+		if (fasgaResults == null) 
+		{
 			fasgaResults = new ResultsTable();
 		}
 		ResultsTable table = fasgaResults;

@@ -7,8 +7,14 @@ import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
-public class DistanceProfile {
-
+/**
+ * Utilities for computing profile of intensity or color components for couple
+ * of input image and label image.
+ * 
+ * @author dlegland
+ */
+public class DistanceProfile 
+{
 	/**
 	 * Converts an image of distance map to an image containing index of
 	 * distance classes.
@@ -20,26 +26,32 @@ public class DistanceProfile {
 	 * @return a scalar image containing index of classes
 	 */
 	public static final ImageProcessor distanceMapToClasses(ImageProcessor image, 
-			int nClasses) {
+			int nClasses) 
+	{
 		// Compute image size
 		int width = image.getWidth();
 		int height = image.getHeight();
 
 		// Create new processor for storing result class labels
 		ImageProcessor result;
-		if (nClasses < 256) {
+		if (nClasses < 256) 
+		{
 			result = new ByteProcessor(width, height);
-		} else if (nClasses < 256 * 256) {
+		} else if (nClasses < 256 * 256) 
+		{
 			result = new ShortProcessor(width, height);
-		} else {
+		} else 
+		{
 			IJ.error("Too many classes");
 			return null;
 		}
 		
 		// Compute max value within the image
 		double maxDist = 0;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) 
+		{
+			for (int y = 0; y < height; y++)
+			{
 				maxDist = Math.max(maxDist, image.getf(x, y));
 			}
 		}
@@ -50,8 +62,10 @@ public class DistanceProfile {
 		// compute index of each pixel
 		double inputValue;
 		int classIndex;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++)
+			{
 				inputValue = Math.min(image.getf(x, y), maxDist);
 				classIndex = (int) Math.ceil(inputValue / classWidth);
 				result.set(x, y, classIndex);
@@ -81,27 +95,33 @@ public class DistanceProfile {
 	 * @throws IllegalArgumentException
 	 *             if image sizes differ
 	 */
-	public static ResultsTable intensityByRegion(ImageProcessor image, ImageProcessor regions) {
+	public static ResultsTable intensityByRegion(ImageProcessor image,
+			ImageProcessor regions) 
+	{
 		// get image size
 		int width = image.getWidth(); 
 		int height = image.getHeight(); 
 		
 		// check image type
-		if (image instanceof ColorProcessor) {
+		if (image instanceof ColorProcessor) 
+		{
 			throw new IllegalArgumentException(
 					"Input image must be scalar");
 		}
 
 		// check image sizes
-		if (regions.getWidth() != width || regions.getHeight() != height) {
+		if (regions.getWidth() != width || regions.getHeight() != height) 
+		{
 			throw new IllegalArgumentException(
 					"Input images must have the same size");
 		}
 		
 		// First compute number of regions
 		int nRegions = 0;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) 
+		{
+			for (int y = 0; y < height; y++) 
+			{
 				nRegions = Math.max(nRegions, regions.get(x, y));
 			}
 		}
@@ -111,8 +131,10 @@ public class DistanceProfile {
 		int[] counts = new int[nRegions+1];
 
 		// iterate over pixels, and update data of corresponding regions
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++)
+		{
+			for (int y = 0; y < height; y++) 
+			{
 				int region = regions.get(x, y);
 				if (region == 0)
 					continue;
@@ -123,7 +145,8 @@ public class DistanceProfile {
 			
 		// Initialize a new result table
 		ResultsTable result = new ResultsTable();
-		for (int i = 0; i < nRegions; i++) {
+		for (int i = 0; i < nRegions; i++)
+		{
 			double value = sums[i] / counts[i];
 			
 			// add an entry to the resulting data table
@@ -148,27 +171,33 @@ public class DistanceProfile {
 	 * @throws IllegalArgumentException
 	 *             if image sizes differ
 	 */
-	public static ResultsTable colorByRegion(ColorProcessor image, ImageProcessor regions) {
+	public static ResultsTable colorByRegion(ColorProcessor image,
+			ImageProcessor regions) 
+	{
 		// get image size
 		int width = image.getWidth(); 
 		int height = image.getHeight(); 
 		
 		// check image type
-		if (!(image instanceof ColorProcessor)) {
+		if (!(image instanceof ColorProcessor)) 
+		{
 			throw new IllegalArgumentException(
 					"Input image must be color");
 		}
 
 		// check image sizes
-		if (regions.getWidth() != width || regions.getHeight() != height) {
+		if (regions.getWidth() != width || regions.getHeight() != height) 
+		{
 			throw new IllegalArgumentException(
 					"Input images must have the same size");
 		}
 		
 		// First compute number of regions
 		int nRegions = 0;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) 
+		{
+			for (int y = 0; y < height; y++) 
+			{
 				nRegions = Math.max(nRegions, regions.get(x, y));
 			}
 		}
@@ -181,8 +210,10 @@ public class DistanceProfile {
 
 		// iterate over pixels, and update data of corresponding regions
 		int[] rgbArray = new int[3];
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) 
+		{
+			for (int y = 0; y < height; y++) 
+			{
 				int region = regions.get(x, y);
 				if (region == 0)
 					continue;
@@ -201,7 +232,8 @@ public class DistanceProfile {
 		
 		// compute mean values for each region
 		double value;
-		for (int i = 0; i < nRegions; i++) {
+		for (int i = 0; i < nRegions; i++) 
+		{
 			// add an entry to the resulting data table
 			result.incrementCounter();
 			

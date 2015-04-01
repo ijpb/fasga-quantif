@@ -12,6 +12,9 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 /**
+ * A Plugin to convert between color spaces. 
+ * Was used to check difference between HSV and HSB.
+ * 
  * @author David Legland
  *
  */

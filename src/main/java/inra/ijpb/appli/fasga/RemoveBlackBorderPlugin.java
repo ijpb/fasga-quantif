@@ -9,6 +9,9 @@ import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 
 /**
+ * Simple plugin that removes the black border that can arise around a color image.
+ * Size of black border is measured in the middle of the image in each direction.
+ * 
  * @author dlegland
  *
  */
