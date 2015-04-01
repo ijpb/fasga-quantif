@@ -62,7 +62,7 @@ public class QuantifFasga2Plugin implements PlugIn
 //		int closingRadius = 6;
 //		int openingRadius = 12;
 //		double sigma = 4;
-		int closingRadius = 6;
+		int closingRadius = 4;
 		int openingRadius = 12;
 		double sigma = 4;
 		ImageProcessor filtered = Fasga2MorphoFilteringPlugin

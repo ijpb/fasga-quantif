@@ -174,12 +174,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		FloatProcessor hue = computeHue(colorImage);
 		FloatProcessor brightness = colorImage.getBrightness();
 
-		
-		if (showImages)
-		{
-			new ImagePlus("Hue", hue).show();
-			new ImagePlus("Brightness", brightness).show();
-		}
+//		if (showImages)
+//		{
+//			new ImagePlus("Hue", hue).show();
+//			new ImagePlus("Brightness", brightness).show();
+//		}
 		
 
 		// Stem image with different threshold, but keep rind within.
