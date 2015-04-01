@@ -59,6 +59,9 @@ public class QuantifFasga2Plugin implements PlugIn
 
 		// First step is to apply several image processing filters
 		// Calls the filtering plugin
+//		int closingRadius = 6;
+//		int openingRadius = 12;
+//		double sigma = 4;
 		int closingRadius = 6;
 		int openingRadius = 12;
 		double sigma = 4;
@@ -76,6 +79,7 @@ public class QuantifFasga2Plugin implements PlugIn
 						redRegionThreshold, true);
 		
 		// Compute morphometric features
+		IJ.log("Compute Results");
 		ResultsTable table = Fasga2QuantifySegmentedSlicePlugin.quantifyRegions(filtered, labelImage, 1);
 		table.setLabel(imagePlus.getShortTitle(), table.getCounter() - 1);
 		
@@ -95,7 +99,8 @@ public class QuantifFasga2Plugin implements PlugIn
 		// apply morphological filtering for removing cell wall images
 		IJ.log("Start morphological filtering");
 		IJ.log("   closing");
-		Strel oct5 = OctagonStrel.fromRadius(6);
+//		Strel oct5 = OctagonStrel.fromRadius(6);
+		Strel oct5 = OctagonStrel.fromRadius(4);
 		DefaultAlgoListener.monitor(oct5);
 		ImageProcessor filtered = Morphology.closing(image, oct5);
 		IJ.log("   opening");

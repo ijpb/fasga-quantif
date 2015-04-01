@@ -84,8 +84,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       			<groupId>org.apache.maven.plugins</groupId>
       			<artifactId>maven-jar-plugin</artifactId>
       			<configuration>
-        			<!-- <outputDirectory>${basedir}/plugins</outputDirectory>  -->
-        			<outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory>
+        			<outputDirectory>${basedir}/plugins</outputDirectory>
+        			<!-- <outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory> -->
       			</configuration>
     		</plugin>
     		

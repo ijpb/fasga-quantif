@@ -254,7 +254,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		IJ.log("  Compute Labels");
 		ImageProcessor labelImage = createLabelImage(redZone, blueZone, rind, bundles);
 		labelImage.setMinAndMax(0, 4);
-		
+		IJ.log("  (end of classification)");
+
 		return labelImage;
 	}
 	

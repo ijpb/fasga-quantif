@@ -43,7 +43,7 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 	public void run(String arg0)
 	{
 		int flag = showDialog();
-		if (flag == 0) 
+		if (flag == PlugInFilter.DONE) 
 			return;
 		
 		ResultsTable table = quantifyRegions(refImage, labelImage, resol);
@@ -118,6 +118,7 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 	public static final ResultsTable quantifyRegions(ImageProcessor refImage,
 			ImageProcessor labelImage, double resol)
 	{
+		IJ.log("Quantify regions Morphometry");
 		// extract image size
 		int width = labelImage.getWidth();
 		int height = labelImage.getHeight();
@@ -207,6 +208,9 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 			}
 				
 		}
+		
+		IJ.log("  (morphometry done)");
+		
 		return table;
 	}
 }
