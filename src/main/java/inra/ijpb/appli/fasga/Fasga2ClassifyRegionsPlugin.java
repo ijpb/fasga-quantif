@@ -51,8 +51,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	private ImageProcessor resultRGB;
 
 	// parameters of the plugin
+	double highThresholdHoles = .99;
+	double lowThresholdHoles = .97;
 	int darkRegionThreshold = 130;
 	int redRegionThreshold = 170;
+	int bundlesMinPixelNumber = 100;
 	
 	/**
 	*/
@@ -95,9 +98,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
     	this.baseImage = imp.getProcessor().duplicate();
 
     	GenericDialog gd = new GenericDialog("Fasga Classify Regions");
+    	gd.addNumericField("High threshold for holes (0->1)", highThresholdHoles, 4);
+    	gd.addNumericField("Low threshold for holes (0->1)", lowThresholdHoles, 4);
 		gd.addNumericField("Dark Regions Threshold", darkRegionThreshold, 0);
 		gd.addNumericField("Red Regions Threshold", redRegionThreshold, 0);
-//		gd.addNumericField("Gaussian Smoothing", 4, 1);
+		gd.addNumericField("Bundles Min. Size (pixels)", 100, 0);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -125,8 +130,11 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 
     private void parseDialogParameters(GenericDialog gd) {
 		// Extract parameters
+		this.highThresholdHoles = gd.getNextNumber();
+		this.lowThresholdHoles = gd.getNextNumber();
 		this.darkRegionThreshold = (int) gd.getNextNumber();
 		this.redRegionThreshold = (int) gd.getNextNumber();
+		this.bundlesMinPixelNumber = (int) gd.getNextNumber();
     }
 
     @Override
@@ -140,7 +148,9 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	{ 
 		// Execute core of the plugin
 		this.result = computeStemRegions(image,
-				this.darkRegionThreshold, this.redRegionThreshold, true);
+				this.highThresholdHoles, this.lowThresholdHoles, 
+				this.darkRegionThreshold, this.redRegionThreshold, 
+				this.bundlesMinPixelNumber, true);
 		this.resultRGB = colorizeRegionImage(this.result);
 				
     	if (previewing) 
@@ -154,10 +164,23 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	}
 
 	/**
-	 * Computes a label image corresponding to different regions in the stem.
+	 * Old signature of the method, kept for bakcward compatibility.
 	 */
 	public static final ImageProcessor computeStemRegions(ImageProcessor image,
 			int darkRegionsThreshold, int redRegionThreshold, boolean showImages)
+	{
+		return computeStemRegions(image, .99, .97, darkRegionsThreshold,
+				redRegionThreshold, 120, showImages);
+	}
+
+	/**
+	 * Computes a label image corresponding to different regions in the stem.
+	 */
+	public static final ImageProcessor computeStemRegions(ImageProcessor image,
+			double holeThresholdHigh, double holeThresholdLow, 
+			int darkRegionsThreshold, int redRegionThreshold,
+			int minBundleSizeInPixels,
+			boolean showImages)
 	{
 		// apply morphological filtering for removing cell wall images
 		IJ.log("Start classify regions");
@@ -190,8 +213,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		
 		// detect eventual holes in the stem
 		IJ.log("  Detect holes");
-		ImageProcessor holes = Threshold.threshold(luma, .99, 1.0);
-		ImageProcessor holes2 = Threshold.threshold(luma, .97, 1.0);
+		ImageProcessor holes = Threshold.threshold(luma, holeThresholdHigh, 1.0);
+		ImageProcessor holes2 = Threshold.threshold(luma, holeThresholdLow, 1.0);
 		holes = GeodesicReconstruction.reconstructByDilation(holes, holes2);
 		
 		// combine image of stem with image of holes
@@ -206,6 +229,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		IJ.log("  Extract dark regions");
 		// Extract bundles + sclerenchyme
 		ImageProcessor darkRegions = Threshold.threshold(brightness, 0, darkRegionsThreshold / 255.0);
+		constrainToMask(darkRegions, stem);
 		if (showImages)
 		{
 			new ImagePlus("Dark Regions", darkRegions).show();
@@ -221,7 +245,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		IJ.log("  Compute Bundles");
 		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
 		bundles = GeodesicReconstruction.fillHoles(bundles);
-		bundles = BinaryImages.areaOpening(bundles, 250);
+		bundles = BinaryImages.areaOpening(bundles, minBundleSizeInPixels);
 		if (showImages) 
 		{
 			new ImagePlus("Bundles", bundles).show();
