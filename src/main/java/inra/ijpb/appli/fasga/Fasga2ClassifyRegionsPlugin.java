@@ -172,6 +172,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		IJ.log("  Extract Hue and Brightness components");
 		ColorProcessor colorImage = (ColorProcessor) image;
 		FloatProcessor hue = computeHue(colorImage);
+		FloatProcessor luma = computeLuma(colorImage);
 		FloatProcessor brightness = colorImage.getBrightness();
 
 //		if (showImages)
@@ -189,8 +190,8 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		
 		// detect eventual holes in the stem
 		IJ.log("  Detect holes");
-		ImageProcessor holes = Threshold.threshold(brightness, .997, 1.0);
-		ImageProcessor holes2 = Threshold.threshold(brightness, .99, 1.0);
+		ImageProcessor holes = Threshold.threshold(luma, .99, 1.0);
+		ImageProcessor holes2 = Threshold.threshold(luma, .97, 1.0);
 		holes = GeodesicReconstruction.reconstructByDilation(holes, holes2);
 		
 		// combine image of stem with image of holes
@@ -284,6 +285,39 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		
 		return result;
 	}
+	
+	/**
+	 * Compute luma component of a color image, as weighted sum of RGB
+	 * components, and returns the result in a float processor instead of a
+	 * ByteProcessor.
+	 * 
+	 */
+	private static final FloatProcessor computeLuma(ColorProcessor image)
+	{
+		// get image size
+		int width = image.getWidth();
+		int height = image.getHeight();
+		
+		// allocate memory for result
+		FloatProcessor result = new FloatProcessor(width, height);
+		
+		// iterate over pixels
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				int c = image.get(x, y);
+				int r = (c & 0xFF0000) >> 16;
+				int g = (c & 0xFF00) >> 8;
+				int b =  c & 0xFF;
+				float luma = (r * .299f + g * .587f + b * .114f) / 255;
+				result.setf(x, y, luma);
+			}
+		}
+		
+		return result;
+	}
+
 	
 //	private static final ByteProcessor convertToByteProcessor(ImageProcessor image, boolean rescale) 
 //	{

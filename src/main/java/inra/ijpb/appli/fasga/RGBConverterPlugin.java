@@ -54,6 +54,10 @@ public class RGBConverterPlugin implements PlugIn
 		{
 			result = computeBrightness(colorImage);
 		}
+		else if (arg.compareToIgnoreCase("luma") == 0) 
+		{
+			result = computeLuma(colorImage);
+		}
 		else
 		{
 			throw new IllegalArgumentException("Could not understand parameter: " + arg);
@@ -140,6 +144,39 @@ public class RGBConverterPlugin implements PlugIn
 				int b =  c & 0xFF;
 				Color.RGBtoHSB(r, g, b, hsb);
 				result.setf(x, y, hsb[2]);
+			}
+		}
+		
+		return result;
+	}
+
+
+	/**
+	 * Compute luma component of a color image, as weighted sum of RGB
+	 * components, and returns the result in a float processor instead of a
+	 * ByteProcessor.
+	 * 
+	 */
+	private static final FloatProcessor computeLuma(ColorProcessor image)
+	{
+		// get image size
+		int width = image.getWidth();
+		int height = image.getHeight();
+		
+		// allocate memory for result
+		FloatProcessor result = new FloatProcessor(width, height);
+		
+		// iterate over pixels
+		for (int y = 0; y < height; y++)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				int c = image.get(x, y);
+				int r = (c & 0xFF0000) >> 16;
+				int g = (c & 0xFF00) >> 8;
+				int b =  c & 0xFF;
+				float luma = (r * .299f + g * .587f + b * .114f) / 255;
+				result.setf(x, y, luma);
 			}
 		}
 		
