@@ -57,6 +57,14 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	int redRegionThreshold = 170;
 	int bundlesMinPixelNumber = 100;
 	
+	
+	// A list of preview images, stored in plugin to avoid creating many many images...
+	static ImagePlus stemImagePlus = null;
+	static ImagePlus darkRegionsImagePlus = null;
+	static ImagePlus bundlesImagePlus = null;
+	static ImagePlus redRegionImagePlus = null;
+	static ImagePlus blueRegionImagePlus = null;
+	
 	/**
 	*/
 	public int setup(String arg, ImagePlus imp) 
@@ -221,7 +229,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		stem = ImageCalculator.combineImages(stem, not(holes), ImageCalculator.Operation.AND);
 		if (showImages)
 		{
-			new ImagePlus("Segmented Stem", stem).show();
+			stemImagePlus = updatePreview(stemImagePlus, stem, "Segmented Stem");
 		}
 	
 
@@ -232,7 +240,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		constrainToMask(darkRegions, stem);
 		if (showImages)
 		{
-			new ImagePlus("Dark Regions", darkRegions).show();
+			darkRegionsImagePlus = updatePreview(darkRegionsImagePlus, darkRegions, "Dark Regions");
 		}
 		
 		// Compute rind image, as the largest dark region
@@ -248,7 +256,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		bundles = BinaryImages.areaOpening(bundles, minBundleSizeInPixels);
 		if (showImages) 
 		{
-			new ImagePlus("Bundles", bundles).show();
+			bundlesImagePlus = updatePreview(bundlesImagePlus, bundles, "Bundles");
 		}
 		
 		// Extract red area
@@ -258,7 +266,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		constrainToMask(redZone, stem);
 		if (showImages) 
 		{
-			new ImagePlus("Red Region", redZone).show();
+			redRegionImagePlus = updatePreview(redRegionImagePlus, redZone, "Red Region");
 		}
 		
 		// combine with stem image to remove background
@@ -272,7 +280,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		constrainToMask(blueZone, stem);
 		if (showImages) 
 		{
-			new ImagePlus("Blue Region", blueZone).show();
+			blueRegionImagePlus = updatePreview(blueRegionImagePlus, blueZone, "Blue Region");
 		}
 
 		IJ.log("  Compute Labels");
@@ -342,6 +350,21 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		return result;
 	}
 
+	private static ImagePlus updatePreview(ImagePlus imagePlus, ImageProcessor image, String title)
+	{
+		if (imagePlus == null)
+		{
+			imagePlus = new ImagePlus(title, image);	
+			imagePlus.show();
+		}
+		else
+		{
+			imagePlus.setProcessor(image);
+			imagePlus.repaintWindow();
+		}
+		return imagePlus;
+	}
+	
 	
 //	private static final ByteProcessor convertToByteProcessor(ImageProcessor image, boolean rescale) 
 //	{
