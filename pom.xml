@@ -27,13 +27,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 			<version>${imagej1.version}</version>
 		</dependency>
 	
-		<!-- Jama (Java Matrix package) is used for computing inertia ellipsoid --> 
-		<dependency>
-			<groupId>gov.nist.math</groupId>
-			<artifactId>jama</artifactId>
-			<version>1.0.3</version>
-		</dependency>
-		
 		<!-- Add a dependency to JUnit for unit tests --> 
         <dependency>
             <groupId>junit</groupId>
@@ -78,19 +71,22 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 				</executions>
 			</plugin>
 			
-			<!-- Configure the jar output directory such that plugin can be seen
-				 when ImageJ is run directly from eclipse workspace -->
+			<!-- Configure the jar output directory -->
    			<plugin>
       			<groupId>org.apache.maven.plugins</groupId>
       			<artifactId>maven-jar-plugin</artifactId>
       			<configuration>
+      				<!-- Place the jar in "plugins" directory of current workspace -->
         			<!-- <outputDirectory>${basedir}/plugins</outputDirectory> -->
+        			
+        			<!-- Place the jar in "plugins" directory of local ImageJ installation 
+        				(need to be adapted depending on local configuration...) -->
         			<outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory>
       			</configuration>
     		</plugin>
     		
 			<!-- plugin for generating the javadoc.
-				 Output is located in "ijpb-plugins/target/site/apidocs" -->
+				 Output is located in "target/site/apidocs" -->
     		<plugin>
         		<groupId>org.apache.maven.plugins</groupId>
         		<artifactId>maven-javadoc-plugin</artifactId>
@@ -116,9 +112,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<developer>
 			<id>dlegland</id>
 			<name>David Legland</name>
-			<email>david.legland@grignon.inra.fr</email>
+			<email>david.legland@nantes.inra.fr</email>
 			<organization>INRA</organization>
-			<organizationUrl>http://www-ijpb.versailles.inra.fr/en/bc/equipes/modelisation-imagerie/</organizationUrl>
 			<roles>
 				<role>architect</role>
 				<role>developer</role>
