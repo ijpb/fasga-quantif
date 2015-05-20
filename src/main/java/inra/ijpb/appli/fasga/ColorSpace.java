@@ -5,7 +5,7 @@ package inra.ijpb.appli.fasga;
 
 /**
  * Interface for specification of a color space converter.
- * @author David Legland
+ * http://www.easyrgb.com/math.html
  *
  */
 public interface ColorSpace
