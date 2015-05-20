@@ -34,9 +34,10 @@ import java.util.HashMap;
 import static inra.ijpb.math.ImageCalculator.not;
 
 /**
- * Plugin integrating the various processing step of FAsga quantification. The steps include:
+ * Plugin integrating the various processing step of Fasga quantification. The steps include:
  * <ul>
  * <li> Morphological filtering</li> 
+ * <li> Stem segmentation</li> 
  * <li> Tissues classification</li> 
  * <li> Quantification (morphology and colorimetry)</li> 
  * </ul>
@@ -65,22 +66,31 @@ public class QuantifFasga2Plugin implements PlugIn
 		int closingRadius = 4;
 		int openingRadius = 12;
 		double sigma = 4;
-		ImageProcessor filtered = Fasga2MorphoFilteringPlugin
+		ImageProcessor filteredImage = Fasga2MorphoFilteringPlugin
 				.computeFilteredImage(image, closingRadius, openingRadius,
 						sigma);
-		new ImagePlus("Filtered", filtered).show();
+		new ImagePlus("Filtered", filteredImage).show();
 
-		// Computes regions from filtered image
+		double holeThresholdHigh = .99;
+		double holeThresholdLow = .99;
+		int bubblesThicknessPx = 10;
+		ImageProcessor stemImage = 
+				Fasga2SegmentStemPlugin.segmentStem(filteredImage, holeThresholdHigh, holeThresholdLow, 
+			bubblesThicknessPx, true);
+				
+		// Computes regions from filtered image and segmented stem
 		// Result is a label image
 		int darkRegionsThreshold = 130; 
 		int redRegionThreshold = 170; 
-		ImageProcessor labelImage = Fasga2ClassifyRegionsPlugin
-				.computeStemRegions(filtered, darkRegionsThreshold,
-						redRegionThreshold, true);
+		int minBundleSizeInPixels = 100; 
+		ImageProcessor labelImage = 
+				Fasga2SegmentRegionsPlugin.segmentStemRegions(filteredImage,
+						stemImage, darkRegionsThreshold, redRegionThreshold, 
+						minBundleSizeInPixels, true);
 		
 		// Compute morphometric features
 		IJ.log("Compute Results");
-		ResultsTable table = Fasga2QuantifySegmentedSlicePlugin.quantifyRegions(filtered, labelImage, 1);
+		ResultsTable table = Fasga2QuantifySegmentedSlicePlugin.quantifyRegions(filteredImage, labelImage, 1);
 		table.setLabel(imagePlus.getShortTitle(), table.getCounter() - 1);
 		
 		table.show("Fasga Results");
