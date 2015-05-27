@@ -47,9 +47,11 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 			return;
 		
 		ResultsTable table = quantifyRegions(refImage, labelImage, resol);
-		table.setLabel(refImageName, table.getCounter() - 1);
-		
-		table.show("Quantif. Fasga");
+		if (table != null) 
+		{
+			table.setLabel(refImageName, table.getCounter() - 1);
+			table.show("Quantif. Fasga");
+		}
 	}
 
 	/**
@@ -119,6 +121,14 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 			ImageProcessor labelImage, double resol)
 	{
 		IJ.log("Quantify regions Morphometry");
+		
+		// Check that label image has adequate type
+		if (labelImage.getBitDepth() > 16)
+		{
+			IJ.error("Label Image must have 8- or 16-bits depth");
+			return null;
+		}
+		
 		// extract image size
 		int width = labelImage.getWidth();
 		int height = labelImage.getHeight();
@@ -146,7 +156,8 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 				case 3: nPixelRind++; break;
 				case 4: nPixelBundles++; break;
 				default:
-					System.out.println("Unknown label: " + label);
+					IJ.error("Label Image contains unknown label: " + label);
+					return null;
 				}
 			}
 		}
@@ -174,16 +185,12 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 		double redFraction = (double) nPixelRed / (double) nPixelStem; 
 		double blueFraction = (double) nPixelBlue / (double) nPixelStem; 
 
-		// Calcule la couleur moyenne dans chacune des regions
+		// Compute average color in each region
 		ResultsTable rgbTable = DistanceProfile.colorByRegion(
 				(ColorProcessor) refImage, labelImage);
 		
-		// Creates the new table
-		if (fasgaResults == null) 
-		{
-			fasgaResults = new ResultsTable();
-		}
-		ResultsTable table = fasgaResults;
+		// get results table, or create one if necessary
+		ResultsTable table = getResultsTable();
 		table.incrementCounter();
 		
 		// Add area fractions of each region
@@ -212,5 +219,18 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 		IJ.log("  (morphometry done)");
 		
 		return table;
+	}
+	
+	/**
+	 * Returns the current instance of ResultsTable that stores results, 
+	 * or creates one if necessary.
+	 */
+	private static final ResultsTable getResultsTable() 
+	{
+		if (fasgaResults == null) 
+		{
+			fasgaResults = new ResultsTable();
+		}
+		return fasgaResults;
 	}
 }
