@@ -104,7 +104,7 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
     	this.imagePlus = imp;
     	this.baseImage = imp.getProcessor().duplicate();
 
-    	GenericDialog gd = new GenericDialog("Fasga Classify Regions");
+    	GenericDialog gd = new GenericDialog("Fasga Segment Stem");
     	gd.addNumericField("High threshold for holes (0->1)", highThresholdHoles, 4);
     	gd.addNumericField("Low threshold for holes (0->1)", lowThresholdHoles, 4);
 		gd.addNumericField("Bubbles Diameter (pixels)", 10, 0);
