@@ -1,7 +1,14 @@
-// Macro pour appliquer le meme traitement à toutes les images d'un repertoire
+// Macro de traitement en batch d'une serie d'images colorees au Fasga
 //
 // Les repertoires sont choisis interactivement, 
-// puis chaque image est traitee successivement et sauvegardee.
+// puis chaque image est traitee successivement avec le meme jeu de parametres.
+// Les traitements suivants sont effectues :
+// * suppression des bords noirs de l'image
+// * multiplication par deux pour corriger l'effet sombre
+// * filtrage de l'image (ouverture morphologique, puis fermeture morphologique, puis lissage avec 
+//		filtre gaussien)
+// * detection de la region correspondant a la tige
+// * 
 
 // On choisit les repertoires source et destination
 dir1 = getDirectory("Choose Source Directory ");
@@ -26,34 +33,44 @@ for (i=0; i<list.length; i++) {
    if (dotIndex!=-1)
       currentName = substring(currentName, 0, dotIndex); // remove extension
 
-   // Applique les traitements a l'image
-   // (a modifier selon les cas)
+   // Supprime les bords noirs, et corrige l'effet d'image sombre
    run("Remove Black Border");
    run("Multiply...", "value=2");
    rename("current");
 
-   
-   run("Fasga Color Filtering", "cell=6 bright=12 gaussian=4");
-   run("Fasga Region Classification", "dark=130 red=170");
+   // Filtrage de l'image couleur
+   run("Color Filtering", "cell=6 bright=12 gaussian=4");
+  
+   // Detection de la region correspondant a la tige
+   selectWindow("current-filtered");
+   run("Stem Segmentation", "high=0.9900 low=0.9700 bubbles=10");
+   rename("stem");
 
+   // Detection des regions d'interet dans l'image
+   selectWindow("current-filtered");
+   run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
+   
    // calcule le nom de fichier du resultat
    path2 = dir2 + list[i];
    dotIndex = lastIndexOf(path2, ".");
    if (dotIndex!=-1)
       path2 = substring(path2, 0, dotIndex); // remove extension
 
-   // sauve l'image resultat
+   // sauve l'image resultat (coloree en fonction de la region)
    selectWindow("current-filtered-regionsRGB");
    save(path2 + "-regionsRGB.tif");
    close("current-filtered-regionsRGB");
    
    //save(path + ".tif");
    
+   // Reprend l'image label des regions, et quantifie la morphometrie
+   // Les resultats sont ajoutes au tableau de resultat courant
    selectWindow("current-filtered");
    rename(currentName);
-   run("Fasga Region Quantification", currentName+" label=current-filtered-regions resolution=1");
+   run("Region Quantification", currentName+" label=current-filtered-regions resolution=1");
 
    // ferme les images intermediaires
+   close("stem");
    close("current-filtered-regions");
    close("Blue Region");
    close("Red Region");

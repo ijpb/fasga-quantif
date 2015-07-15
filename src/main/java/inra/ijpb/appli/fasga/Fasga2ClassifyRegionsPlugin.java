@@ -172,7 +172,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 	}
 
 	/**
-	 * Old signature of the method, kept for bakcward compatibility.
+	 * Old signature of the method, kept for backward compatibility.
 	 */
 	public static final ImageProcessor computeStemRegions(ImageProcessor image,
 			int darkRegionsThreshold, int redRegionThreshold, boolean showImages)
@@ -180,6 +180,7 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		return computeStemRegions(image, .99, .97, darkRegionsThreshold,
 				redRegionThreshold, 120, showImages);
 	}
+
 
 	/**
 	 * Computes a label image corresponding to different regions in the stem.
@@ -205,13 +206,6 @@ public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, Dialog
 		FloatProcessor hue = computeHue(colorImage);
 		FloatProcessor luma = computeLuma(colorImage);
 		FloatProcessor brightness = colorImage.getBrightness();
-
-//		if (showImages)
-//		{
-//			new ImagePlus("Hue", hue).show();
-//			new ImagePlus("Brightness", brightness).show();
-//		}
-		
 
 		// Stem image with different threshold, but keep rind within.
 		IJ.log("  Compute Stem Image");

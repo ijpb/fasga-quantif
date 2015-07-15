@@ -309,6 +309,12 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 		int width = image.getWidth();
 		int height = image.getHeight();
 
+		if (mask.getWidth() != width || mask.getHeight() != height)
+		{
+			IJ.error("Both images must have the same size");
+			throw new IllegalArgumentException("Input images must have the same size");
+		}
+		
 		for (int y = 0; y < height; y++)
 		{
 			for (int x = 0; x < width; x++)
