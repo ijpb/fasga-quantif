@@ -192,7 +192,8 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
 		
 		// Morphological filtering to remove boundary of bubbles
 		IJ.log("  Remove bubbles");
-		Strel se = DiskStrel.fromDiameter(bubblesDiameterPx);
+//		Strel se = DiskStrel.fromDiameter(bubblesDiameterPx);
+		Strel se = DiskStrel.fromRadius((bubblesDiameterPx - 1)/ 2);
 		stem = Morphology.opening(stem, se);
 
 		// remove small components
