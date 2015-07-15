@@ -46,6 +46,13 @@ for (i=0; i<list.length; i++) {
    run("Stem Segmentation", "high=0.9900 low=0.9700 bubbles=10");
    rename("stem");
 
+   // Ajoute un filtrage base sur la taille des zones claires
+   // -> on enleve les "trous" qui sont trop petits.
+   // La taille est donnee en nombre de pixels.
+   run("Invert");
+   run("Size Opening", "min=200");
+   run("Invert");
+
    // Detection des regions d'interet dans l'image
    selectWindow("current-filtered");
    run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
