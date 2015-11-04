@@ -12,7 +12,7 @@ import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
-import inra.ijpb.event.DefaultAlgoListener;
+import inra.ijpb.algo.DefaultAlgoListener;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.OctagonStrel;

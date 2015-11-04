@@ -3,6 +3,7 @@
  */
 package inra.ijpb.appli.fasga;
 
+import static inra.ijpb.math.ImageCalculator.not;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -13,10 +14,9 @@ import ij.process.AutoThresholder;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+import inra.ijpb.algo.DefaultAlgoListener;
 import inra.ijpb.binary.BinaryImages;
-import inra.ijpb.binary.ConnectedComponents;
 import inra.ijpb.data.image.ColorImages;
-import inra.ijpb.event.DefaultAlgoListener;
 import inra.ijpb.label.LabelImages;
 import inra.ijpb.math.ImageCalculator;
 import inra.ijpb.measure.GeometricMeasures2D;
@@ -30,8 +30,6 @@ import inra.ijpb.segment.Threshold;
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
-
-import static inra.ijpb.math.ImageCalculator.not;
 
 /**
  * Plugin integrating the various processing step of Fasga quantification. The steps include:
@@ -204,7 +202,7 @@ public class QuantifFasga2Plugin implements PlugIn
 		
 
 		// Analyze bundles -> number of bundles
-		ImageProcessor bunLabels = ConnectedComponents.computeLabels(bundles, 4, 16);
+		ImageProcessor bunLabels = BinaryImages.componentsLabeling(bundles, 4, 16);
 		int[] labels = LabelImages.findAllLabels(bunLabels);
 		int bundlesNumber = labels.length;
 		

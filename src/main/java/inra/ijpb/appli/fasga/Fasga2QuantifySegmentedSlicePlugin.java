@@ -13,7 +13,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import inra.ijpb.binary.ConnectedComponents;
+import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.label.LabelImages;
 
 /**
@@ -175,7 +175,7 @@ public class Fasga2QuantifySegmentedSlicePlugin implements PlugIn
 		
 		
 		// Analyze bundles -> number of bundles
-		ImageProcessor bunLabels = ConnectedComponents.computeLabels(bundlesImage, 4, 16);
+		ImageProcessor bunLabels = BinaryImages.componentsLabeling(bundlesImage, 4, 16);
 		int[] labels = LabelImages.findAllLabels(bunLabels);
 		int bundlesNumber = labels.length;
 
