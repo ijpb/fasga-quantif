@@ -32,7 +32,6 @@ import java.io.File;
  */
 public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogListener 
 {
-
 	/** Apparently, it's better to store flags in plugin */
 	private int flags = DOES_ALL | KEEP_PREVIEW | FINAL_PROCESSING;
 	
@@ -60,7 +59,6 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 	
 	
 	// A list of preview images, stored in plugin to avoid creating many many images...
-//	static ImagePlus stemImagePlus = null;
 	static ImagePlus darkRegionsImagePlus = null;
 	static ImagePlus bundlesImagePlus = null;
 	static ImagePlus redRegionImagePlus = null;
@@ -160,9 +158,6 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
     private void parseDialogParameters(GenericDialog gd)
     {
 		// Extract parameters
-//    	int filteredImageIndex = gd.getNextChoiceIndex();
-//		ImagePlus filteredPlus = WindowManager.getImage(filteredImageIndex + 1);
-//		this.baseImage = filteredPlus.getProcessor();
     	int stemImageIndex = gd.getNextChoiceIndex();
 		ImagePlus stemPlus = WindowManager.getImage(stemImageIndex + 1);
 		this.stemImage = stemPlus.getProcessor();

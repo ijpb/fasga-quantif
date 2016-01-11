@@ -31,6 +31,7 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 	ImageProcessor colorImage = null;
 	ImageProcessor stemImage = null;
 	int pointNumber = 100;
+	boolean computeLignification = true;
 		
 	@Override
 	public void run(String arg0)
@@ -40,9 +41,28 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 			return;
 		
 		ResultsTable table = computeColorProfiles(colorImage, stemImage, pointNumber);
-		if (table != null) 
+
+		if (computeLignification)
 		{
-			table.show("Color Profiles");
+			int n = table.getCounter();
+			for (int i = 0; i < n; i++)
+			{
+				double red = table.getValueAsDouble(0, i);
+				double blue = table.getValueAsDouble(2, i);
+				double ratio = red / blue;
+				
+				table.setValue("Lignification", i, ratio);
+			}
+		}
+
+		// Display raw results
+		table.show("Color Profiles");
+		plotColorProfiles(table);
+		
+		// eventually display lignification profile
+		if (computeLignification)
+		{
+			plotLignificationProfile(table);
 		}
 	}
 
@@ -82,6 +102,7 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 		gd.addChoice("Stem Image:", imageNames, selectedImageName);
 		
 		gd.addNumericField("Number of points:", 100, 0);
+		gd.addCheckbox("Lignification Computation", true);
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -100,7 +121,8 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 		int refImageIndex = (int) gd.getNextChoiceIndex();
 		int labelImageIndex = (int) gd.getNextChoiceIndex();
 		this.pointNumber = (int) gd.getNextNumber();
-		
+		this.computeLignification = gd.getNextBoolean();
+
 		// get selected images
 		ImagePlus refPlus = WindowManager.getImage(refImageIndex + 1);
 		this.colorImage = refPlus.getProcessor();
@@ -128,13 +150,7 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 		// Compute average color in each region
 		ResultsTable rgbTable = DistanceProfile.colorByRegion(
 				(ColorProcessor) refImage, regions);
-		
-//		// get results table, or create one if necessary
-//		ResultsTable table = getResultsTable();
-//		table.incrementCounter();
-		
-		plotColorProfiles(rgbTable);
-		
+
 		IJ.log("  (color profiles done)");
 		
 		return rgbTable;
@@ -175,6 +191,40 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 		plot.addPoints(x, table.getColumnAsDoubles(1), Plot.LINE);
 		plot.setColor(Color.BLUE);
 		plot.addPoints(x, table.getColumnAsDoubles(2), Plot.LINE);
+
+		// Display in new window
+		plot.show();
+	}
+	
+	private static final void plotLignificationProfile(ResultsTable table)
+	{
+		// create x values
+		int n = table.getCounter();
+		double x[] = new double[n];
+		double y[] = new double[n];
+		for (int i = 0; i < n; i++) 
+		{
+			x[i] = i;
+			y[i] = 0;
+		}
+		
+		// Compute the max extent of all 3 colors
+		double yMax = 0;
+		for (int i = 0; i < n; i++) 
+		{
+			yMax = Math.max(yMax, table.getValueAsDouble(3, i));
+		}
+
+		// create plot with default line
+		Plot plot = new Plot("Lignification Profile", "Region index", "Values", 
+				x, y);
+
+		// set up plot
+		plot.setLimits(0, n, 0, yMax);
+
+		// Draw each profile
+		plot.setColor(Color.BLACK);
+		plot.addPoints(x, table.getColumnAsDoubles(3), Plot.LINE);
 
 		// Display in new window
 		plot.show();
