@@ -14,6 +14,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
+import inra.ijpb.morphology.GeodesicReconstruction;
 
 import java.awt.Color;
 
@@ -142,10 +143,25 @@ public class Fasga2ColorProfilesPlugin implements PlugIn
 			return null;
 		}
 		
-		ImageProcessor distMap = BinaryImages.distanceMap(stemImage);
-		
+		// remove holes from stem image
+		ImageProcessor stemImage2 = GeodesicReconstruction.fillHoles(stemImage);
+
+		// Compute distance map for the specified number of regions
+		ImageProcessor distMap = BinaryImages.distanceMap(stemImage2);
 		ImageProcessor regions = DistanceProfile.distanceMapToClasses(distMap, 
-				regionNumber); 
+				regionNumber);
+		
+		// remove label of holes 
+		for (int y = 0; y < stemImage.getHeight(); y++)
+		{
+			for (int x = 0; x < stemImage.getWidth(); x++)
+			{
+				if (stemImage.get(x, y) == 0)
+				{
+					regions.set(x, y, 0);
+				}
+			}
+		}
 		
 		// Compute average color in each region
 		ResultsTable rgbTable = DistanceProfile.colorByRegion(
