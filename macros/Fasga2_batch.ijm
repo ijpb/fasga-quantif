@@ -58,11 +58,11 @@ for (i=0; i<list.length; i++) {
 	// Filtrage de l'image couleur, en utilisant des reglages par defaut pour les differents 
 	// parametres
 //   run("Color Filtering", "cell=6 bright=12 gaussian=4");
-	run("Color Filtering", "cell=3 bright=12 gaussian=4");
+	run("Color Filtering", "cell=4 bright=12 gaussian=4");
   
 	// Detection de la region correspondant a la tige
 	selectWindow("current-filtered");
-	run("Stem Segmentation", "high=0.9900 low=0.9700 bubbles=15");
+	run("Stem Segmentation", "high=0.9900 low=0.9700 bubbles=20");
 	rename("stem");
 
     // Ajoute un filtrage base sur la taille des zones claires
@@ -100,6 +100,10 @@ for (i=0; i<list.length; i++) {
     rename(currentName);
     run("Region Quantification", currentName+" label=current-filtered-regions resolution=1");
 
+	// Lance le calcul des profils colorimetriques, avec le profil de lignification
+	run("Color Profiles", "reference=current-filtered stem=current-filtered-stem number=100 lignification");
+	
+	
     // ferme les differentes images intermediaires
     close("stem");
     close("current-filtered-regions");
