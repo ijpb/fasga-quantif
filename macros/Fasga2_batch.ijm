@@ -49,6 +49,9 @@ for (i=0; i<list.length; i++) {
     dotIndex = lastIndexOf(currentName, ".");
     if (dotIndex!=-1)
 		currentName = substring(currentName, 0, dotIndex); // remove extension
+		
+	// ajoute des crochets pour s'assurer que les espaces ne genent pas l'identification
+	currentName2 = "[" + currentName + "]";
 
 	// Supprime les bords noirs, et corrige l'effet d'image sombre
 	run("Remove Black Border");
@@ -58,11 +61,11 @@ for (i=0; i<list.length; i++) {
 	// Filtrage de l'image couleur, en utilisant des reglages par defaut pour les differents 
 	// parametres
 //   run("Color Filtering", "cell=6 bright=12 gaussian=4");
-	run("Color Filtering", "cell=4 bright=12 gaussian=4");
+	run("Color Filtering", "cell=4 bright=12 gaussian=3");
   
 	// Detection de la region correspondant a la tige
 	selectWindow("current-filtered");
-	run("Stem Segmentation", "high=0.9900 low=0.9700 bubbles=20");
+	run("Stem Segmentation", "high=0.9990 low=0.9900 bubbles=20");
 	rename("stem");
 
     // Ajoute un filtrage base sur la taille des zones claires
@@ -98,10 +101,21 @@ for (i=0; i<list.length; i++) {
     // Les resultats sont ajoutes au tableau de resultat courant
     selectWindow("current-filtered");
     rename(currentName);
-    run("Region Quantification", currentName+" label=current-filtered-regions resolution=1");
+    run("Region Quantification", currentName2 + " label=current-filtered-regions resolution=1");
 
 	// Lance le calcul des profils colorimetriques, avec le profil de lignification
-	run("Color Profiles", "reference=current-filtered stem=current-filtered-stem number=100 lignification");
+	run("Color Profiles", "reference=" + currentName2 + " stem=stem number=100 lignification");
+	selectWindow("Color Profiles");
+	outputFileName = currentName + "-ColorProfiles" + ".csv";
+	saveAs("Results", dir2 + outputFileName);
+	// ferme la fenetre de resultats de profils
+	selectWindow(outputFileName); 
+    run("Close");
+	// ferme les graphes
+	selectWindow("Color Profiles"); 
+    run("Close");
+	selectWindow("Lignification Profile"); 
+    run("Close");
 	
 	
     // ferme les differentes images intermediaires
@@ -124,7 +138,7 @@ for (i=0; i<list.length; i++) {
 // A la fin du processus, sauve le tableau de donnees
 resultsTableName = "Quantif. Fasga";
 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
-dateString = "-" + year + "." + month + "." + dayOfMonth;
+dateString = "-" + year + "." + (month+1) + "." + dayOfMonth;
 selectWindow(resultsTableName);
 saveAs("Text", dir2 + resultsTableName + dateString + ".txt");
 
