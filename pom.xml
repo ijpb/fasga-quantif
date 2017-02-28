@@ -77,11 +77,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       			<artifactId>maven-jar-plugin</artifactId>
       			<configuration>
       				<!-- Place the jar in "plugins" directory of current workspace -->
-        			<!-- <outputDirectory>${basedir}/plugins</outputDirectory> -->
+        			<outputDirectory>${basedir}/target</outputDirectory>
         			
         			<!-- Place the jar in "plugins" directory of local ImageJ installation 
         				(need to be adapted depending on local configuration...) -->
-        			<outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory>
+        			<!-- <outputDirectory>C:/Program Files (x86)/ImageJ/plugins</outputDirectory> -->
       			</configuration>
     		</plugin>
     		

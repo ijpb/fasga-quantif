@@ -82,6 +82,7 @@ for (i=0; i<list.length; i++) {
 
     // Detection des regions d'interet dans l'image
     selectWindow("current-filtered");
+//    run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
     run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
    
     // calcule le nom de fichier du resultat
