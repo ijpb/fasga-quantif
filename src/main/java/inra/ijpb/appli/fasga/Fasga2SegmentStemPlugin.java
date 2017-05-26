@@ -57,9 +57,9 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
 	private ImageProcessor result;
 
 	// parameters of the plugin
-	double highThresholdHoles = .99;
-	double lowThresholdHoles = .97;
-	int bubblesDiameterPx = 10;
+	double highThresholdHoles = .999;
+	double lowThresholdHoles = .99;
+	int bubblesDiameterPx = 20;
 	
 	
 	// A list of preview images, stored in plugin to avoid creating many many images...
@@ -107,7 +107,7 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
     	GenericDialog gd = new GenericDialog("Fasga Segment Stem");
     	gd.addNumericField("High threshold for holes (0->1)", highThresholdHoles, 4);
     	gd.addNumericField("Low threshold for holes (0->1)", lowThresholdHoles, 4);
-		gd.addNumericField("Bubbles Diameter (pixels)", 10, 0);
+		gd.addNumericField("Bubbles Thickness (pixels)", bubblesDiameterPx, 0);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
