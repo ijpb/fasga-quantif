@@ -26,10 +26,13 @@ import java.io.File;
 
 /**
  * Classify an image of maize stem after fasga coloration to identify various tissues type.
+ * 
+ * @deprecated use "Fasga2SegmentStemPlugin" and "Fasga2SegmentRegionsPlugin" instead. 
  *    
  * @author David Legland
  *
  */
+@Deprecated
 public class Fasga2ClassifyRegionsPlugin implements ExtendedPlugInFilter, DialogListener 
 {
 
