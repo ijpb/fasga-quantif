@@ -45,6 +45,9 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 	/** keep the original image, to restore it after the preview */
 	private ImageProcessor baseImage;
 	
+	/** The image representing the filtered stem */
+	private ImageProcessor filteredImage;
+
 	/** The binary image of the segmented stem */
 	private ImageProcessor stemImage;
 	
@@ -56,7 +59,8 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 	int darkRegionThreshold = 130;
 	int redRegionThreshold = 170;
 	int bundlesMinPixelNumber = 100;
-	
+	int bundlesMaxPixelNumber = 6000;
+
 	
 	// A list of preview images, stored in plugin to avoid creating many many images...
 	static ImagePlus darkRegionsImagePlus = null;
@@ -70,7 +74,7 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 			new int[]{255,   0, 255}, 	// red region
 			new int[]{  0, 127, 255},	// blue region (dark cyan)
 			new int[]{  0,   0,   0},	// rind is black
-			new int[]{127, 127, 127} };	// bundles are dark gray
+			new int[]{255, 255,   0} };	// bundles are yellow
 
 	/**
 	*/
@@ -125,11 +129,12 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
     	this.baseImage = imp.getProcessor().duplicate();
 
     	GenericDialog gd = new GenericDialog("Fasga Segment Regions");
-//    	gd.addChoice("Filtered Image", imageNames, IJ.getImage().getTitle());
+    	gd.addChoice("Filtered Image", imageNames, IJ.getImage().getTitle());
     	gd.addChoice("Stem Image", imageNames, IJ.getImage().getTitle());
 		gd.addNumericField("Dark Regions Threshold", darkRegionThreshold, 0);
 		gd.addNumericField("Red Regions Threshold", redRegionThreshold, 0);
-		gd.addNumericField("Bundles Min. Size (pixels)", 100, 0);
+		gd.addNumericField("Bundles_Min. Size (pixels)", 100, 0);
+		gd.addNumericField("Bundles_Max. Size (pixels)", 6000, 0);
 
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
@@ -157,13 +162,21 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 
     private void parseDialogParameters(GenericDialog gd)
     {
-		// Extract parameters
+		// Extract filtered image
+    	int filteredImageIndex = gd.getNextChoiceIndex();
+    	ImagePlus filteredPlus = WindowManager.getImage(filteredImageIndex + 1);
+		this.filteredImage = filteredPlus.getProcessor();
+
+		// Extract stem image
     	int stemImageIndex = gd.getNextChoiceIndex();
 		ImagePlus stemPlus = WindowManager.getImage(stemImageIndex + 1);
 		this.stemImage = stemPlus.getProcessor();
+		
+		// extract processing parameters
 		this.darkRegionThreshold = (int) gd.getNextNumber();
 		this.redRegionThreshold = (int) gd.getNextNumber();
 		this.bundlesMinPixelNumber = (int) gd.getNextNumber();
+		this.bundlesMaxPixelNumber = (int) gd.getNextNumber();
     }
 
     @Override
@@ -176,13 +189,15 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 	public void run(ImageProcessor image)
 	{ 
 		// check validity
+		if (this.filteredImage == null)
+			return;
 		if (this.stemImage == null)
 			return;
 		
 		// Execute core of the plugin
-		this.result = segmentStemRegions(image, this.stemImage, 
+		this.result = segmentStemRegions(this.filteredImage, this.stemImage, 
 				this.darkRegionThreshold, this.redRegionThreshold, 
-				this.bundlesMinPixelNumber, true);
+				this.bundlesMinPixelNumber, this.bundlesMaxPixelNumber, true);
 		this.resultRGB = ColorUtils.colorizeLabelImage(this.result, this.labelColors);
 				
     	if (previewing) 
@@ -200,7 +215,7 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 	 */
 	public static final ImageProcessor segmentStemRegions(ImageProcessor image,
 			ImageProcessor stemImage, int darkRegionsThreshold,
-			int redRegionThreshold, int minBundleSizeInPixels,
+			int redRegionThreshold, int minBundleSizeInPixels, int maxBundleSizeInPixels,
 			boolean showImages)	
 	{
 		// apply morphological filtering for removing cell wall images
@@ -230,13 +245,17 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 		
 		// Compute rind image, as the largest dark region
 		IJ.log("  Compute Rind");
-		ImageProcessor rind = BinaryImages.keepLargestRegion(darkRegions);
+//		ImageProcessor rind = BinaryImages.keepLargestRegion(darkRegions);
+		ImageProcessor rind = BinaryImages.areaOpening(darkRegions, maxBundleSizeInPixels);
+		
 		stemImage = ImageCalculator.combineImages(stemImage, rind, ImageCalculator.Operation.OR);
 		
 		
 		// Compute bundles image, by removing rind and filtering remaining image
 		IJ.log("  Compute Bundles");
-		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
+//		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
+		ImageProcessor bundles = ImageCalculator.combineImages(darkRegions, rind, ImageCalculator.Operation.XOR);
+		
 		bundles = GeodesicReconstruction.fillHoles(bundles);
 		bundles = BinaryImages.areaOpening(bundles, minBundleSizeInPixels);
 		if (showImages) 

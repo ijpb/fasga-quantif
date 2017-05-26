@@ -80,11 +80,12 @@ public class QuantifFasga2Plugin implements PlugIn
 		// Result is a label image
 		int darkRegionsThreshold = 130; 
 		int redRegionThreshold = 170; 
-		int minBundleSizeInPixels = 100; 
+		int minBundleSizeInPixels = 100;
+		int maxBundleSizeInPixels = 6000;
 		ImageProcessor labelImage = 
 				Fasga2SegmentRegionsPlugin.segmentStemRegions(filteredImage,
 						stemImage, darkRegionsThreshold, redRegionThreshold, 
-						minBundleSizeInPixels, true);
+						minBundleSizeInPixels, maxBundleSizeInPixels, true);
 		
 		// Compute morphometric features
 		IJ.log("Compute Results");
