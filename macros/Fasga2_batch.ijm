@@ -24,7 +24,8 @@
 
 // On choisit les repertoires source et destination
 dir1 = getDirectory("Choose Source Directory ");
-dir2 = getDirectory("Choose Destination Directory "); 
+dir2 = getDirectory("Output Directory for Images"); 
+dir3 = getDirectory("Output Directory for Tables"); 
 
 // Extraction de la liste des images a traiter
 list = getFileList(dir1);
@@ -65,7 +66,7 @@ for (i=0; i<list.length; i++) {
   
 	// Detection de la region correspondant a la tige
 	selectWindow("current-filtered");
-	run("Stem Segmentation", "high=0.9990 low=0.9900 bubbles=20");
+	run("Stem Segmentation", "high=0.9990 low=0.9900 bubbles=25");
 	rename("stem");
 
     // Ajoute un filtrage base sur la taille des zones claires
@@ -83,7 +84,8 @@ for (i=0; i<list.length; i++) {
     // Detection des regions d'interet dans l'image
     selectWindow("current-filtered");
 //    run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
-    run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
+//    run("Regions Segmentation", "stem=stem dark=130 red=170 bundles=100");
+    run("Regions Segmentation", "filtered=current-filtered stem=stem dark=130 red=170 bundles_min=100 bundles_max=6000");
    
     // calcule le nom de fichier du resultat
     path2 = dir2 + list[i];
@@ -108,7 +110,7 @@ for (i=0; i<list.length; i++) {
 	run("Color Profiles", "reference=" + currentName2 + " stem=stem number=100 lignification");
 	selectWindow("Color Profiles");
 	outputFileName = currentName + "-ColorProfiles" + ".csv";
-	saveAs("Results", dir2 + outputFileName);
+	saveAs("Results", dir3 + outputFileName);
 	// ferme la fenetre de resultats de profils
 	selectWindow(outputFileName); 
     run("Close");
