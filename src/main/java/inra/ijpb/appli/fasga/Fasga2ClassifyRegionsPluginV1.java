@@ -19,7 +19,7 @@ import ij.process.ImageStatistics;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.data.image.ColorImages;
 import inra.ijpb.math.ImageCalculator;
-import inra.ijpb.morphology.GeodesicReconstruction;
+import inra.ijpb.morphology.Reconstruction;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.SquareStrel;
 import inra.ijpb.segment.Threshold;
@@ -167,7 +167,7 @@ public class Fasga2ClassifyRegionsPluginV1 implements ExtendedPlugInFilter, Dial
 
 		// Add morphological processing to keep stem image
 		IJ.log("  fill holes");
-		ImageProcessor stem = GeodesicReconstruction.fillHoles(darkRegions);
+		ImageProcessor stem = Reconstruction.fillHoles(darkRegions);
 		stem = BinaryImages.keepLargestRegion(stem);
 		
 		stem.invertLut();
@@ -295,7 +295,7 @@ public class Fasga2ClassifyRegionsPluginV1 implements ExtendedPlugInFilter, Dial
 		res = inra.ijpb.segment.Threshold.threshold(res, 0, threshold);
 
 		// fill holes in image
-		GeodesicReconstruction.fillHoles(res);
+		Reconstruction.fillHoles(res);
 
 		return res;
 	}

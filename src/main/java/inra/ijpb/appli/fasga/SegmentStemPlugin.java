@@ -7,7 +7,7 @@ import ij.process.AutoThresholder;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
-import inra.ijpb.morphology.GeodesicReconstruction;
+import inra.ijpb.morphology.Reconstruction;
 import inra.ijpb.segment.Threshold;
 
 /**
@@ -100,7 +100,7 @@ public class SegmentStemPlugin implements PlugIn
 //		}
 
 		// fill holes in image
-		res = GeodesicReconstruction.fillHoles(res);
+		res = Reconstruction.fillHoles(res);
 
 		// Set inverted display
 		if (!res.isInvertedLut())

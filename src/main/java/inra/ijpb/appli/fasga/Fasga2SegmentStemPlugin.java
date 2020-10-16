@@ -16,7 +16,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.math.ImageCalculator;
-import inra.ijpb.morphology.GeodesicReconstruction;
+import inra.ijpb.morphology.Reconstruction;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.DiskStrel;
@@ -188,7 +188,7 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
 		// Segment stem using threshold on luminance
 		IJ.log("  Binarize Image");
 		ImageProcessor stem = Threshold.threshold(luma, 0, 200.0 / 255.0);
-		stem = GeodesicReconstruction.fillHoles(stem);
+		stem = Reconstruction.fillHoles(stem);
 		
 		// Morphological filtering to remove boundary of bubbles
 		IJ.log("  Remove bubbles");
@@ -203,7 +203,7 @@ public class Fasga2SegmentStemPlugin implements ExtendedPlugInFilter, DialogList
 		IJ.log("  Detect holes");
 		ImageProcessor holes = Threshold.threshold(luma, holeThresholdHigh, 1.0);
 		ImageProcessor holes2 = Threshold.threshold(luma, holeThresholdLow, 1.0);
-		holes = GeodesicReconstruction.reconstructByDilation(holes, holes2);
+		holes = Reconstruction.reconstructByDilation(holes, holes2);
 		
 		// combine image of stem with image of holes
 		stem = ImageCalculator.combineImages(stem, not(holes), ImageCalculator.Operation.AND);

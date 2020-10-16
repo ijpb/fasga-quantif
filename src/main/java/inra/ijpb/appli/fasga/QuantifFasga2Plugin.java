@@ -7,6 +7,7 @@ import static inra.ijpb.math.ImageCalculator.not;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.GaussianBlur;
@@ -19,9 +20,9 @@ import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.data.image.ColorImages;
 import inra.ijpb.label.LabelImages;
 import inra.ijpb.math.ImageCalculator;
-import inra.ijpb.measure.GeometricMeasures2D;
-import inra.ijpb.morphology.GeodesicReconstruction;
+import inra.ijpb.measure.IntrinsicVolumes2D;
 import inra.ijpb.morphology.Morphology;
+import inra.ijpb.morphology.Reconstruction;
 import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.OctagonStrel;
 import inra.ijpb.morphology.strel.SquareStrel;
@@ -137,7 +138,7 @@ public class QuantifFasga2Plugin implements PlugIn
 
 		// Add morphological processing to keep stem image
 		IJ.log("fill holes");
-		ImageProcessor stem = GeodesicReconstruction.fillHoles(darkRegions);
+		ImageProcessor stem = Reconstruction.fillHoles(darkRegions);
 		IJ.log("morphological filtering");
 		Strel sq2 = SquareStrel.fromRadius(2); 
 		Strel sq4 = SquareStrel.fromRadius(4);
@@ -199,7 +200,8 @@ public class QuantifFasga2Plugin implements PlugIn
 
 		
 		// Area of the whole stem (for normalization) 
-		double stemArea = GeometricMeasures2D.particleArea(stem, 255);
+		Calibration calib = new Calibration();
+		double stemArea = IntrinsicVolumes2D.area(stem, calib);
 		
 
 		// Analyze bundles -> number of bundles
@@ -207,19 +209,19 @@ public class QuantifFasga2Plugin implements PlugIn
 		int[] labels = LabelImages.findAllLabels(bunLabels);
 		int bundlesNumber = labels.length;
 		
-		double bundlesArea = GeometricMeasures2D.particleArea(bundles, 255);
+		double bundlesArea = IntrinsicVolumes2D.area(bundles, calib);
 		double bundlesFraction = bundlesArea / stemArea; 
 		
-		double rindArea = GeometricMeasures2D.particleArea(rind, 255);
+		double rindArea = IntrinsicVolumes2D.area(rind, calib);
 		double rindFraction = rindArea / stemArea;
 		
-		double redArea = GeometricMeasures2D.particleArea(redZone, 255);
+		double redArea = IntrinsicVolumes2D.area(redZone, calib);
 		double redFraction = redArea / stemArea;
 		
-		double blueArea = GeometricMeasures2D.particleArea(blueZone, 255);
+		double blueArea = IntrinsicVolumes2D.area(blueZone, calib);
 		double blueFraction = blueArea / stemArea;
 		
-		// Calcule la couleur moyenne dans la zone "rouge" (ie, lignifiee)
+		// Compute average color within the red region (i.e. lignified)
 		ResultsTable lignifiedColor = new AverageColorPlugin().applyTo(filtered, redZone);
 		double meanRed = lignifiedColor.getValueAsDouble(0, 0);
 		double meanGreen = lignifiedColor.getValueAsDouble(1, 0);
@@ -273,7 +275,7 @@ public class QuantifFasga2Plugin implements PlugIn
 		res = inra.ijpb.segment.Threshold.threshold(res, 0, threshold);
 
 		// fill holes in image
-		GeodesicReconstruction.fillHoles(res);
+		Reconstruction.fillHoles(res);
 
 		return res;
 	}

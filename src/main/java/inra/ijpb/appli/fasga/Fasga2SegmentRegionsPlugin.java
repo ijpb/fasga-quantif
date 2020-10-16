@@ -18,7 +18,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.math.ImageCalculator;
-import inra.ijpb.morphology.GeodesicReconstruction;
+import inra.ijpb.morphology.Reconstruction;
 import inra.ijpb.segment.Threshold;
 
 import java.awt.AWTEvent;
@@ -256,7 +256,7 @@ public class Fasga2SegmentRegionsPlugin implements ExtendedPlugInFilter, DialogL
 //		ImageProcessor bundles = BinaryImages.removeLargestRegion(darkRegions);
 		ImageProcessor bundles = ImageCalculator.combineImages(darkRegions, rind, ImageCalculator.Operation.XOR);
 		
-		bundles = GeodesicReconstruction.fillHoles(bundles);
+		bundles = Reconstruction.fillHoles(bundles);
 		bundles = BinaryImages.areaOpening(bundles, minBundleSizeInPixels);
 		if (showImages) 
 		{
